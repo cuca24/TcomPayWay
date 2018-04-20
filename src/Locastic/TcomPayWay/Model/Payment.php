@@ -10,6 +10,10 @@ namespace Locastic\TcomPayWay\Model;
  */
 class Payment
 {
+
+    const AUTHORIZATION_TYPE_AUTOMATIC = 1;
+    const AUTHORIZATION_TYPE_PRE_AUTHORIZATION = 0;
+
     /**
      * @var int
      */

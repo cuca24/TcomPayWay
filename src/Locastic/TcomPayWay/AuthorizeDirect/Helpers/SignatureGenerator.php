@@ -59,12 +59,25 @@ class SignatureGenerator
     public static function generateSignatureFromArray($secretKey, $data)
     {
         $string = '';
-
         foreach ($data as $key => $value) {
             if ('pgw_signature' == $key) {
                 continue;
             }
+            $string .= $value.$secretKey;
+        }
+        return hash('sha512', $string);
+    }
 
+    /**
+     * @param string $secretKey
+     * @param array  $data
+     * @return string
+     */
+    public static function generateSignatureFromNumberedArray($secretKey, $data)
+    {
+        $string = self::METHOD_NAME.$secretKey;
+
+        foreach ($data as $key => $value) {
             $string .= $value.$secretKey;
         }
 

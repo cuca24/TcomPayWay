@@ -15,6 +15,7 @@ use Locastic\TcomPayWay\Model\PaymentInterface;
  */
 class Payment extends BasePayment implements PaymentInterface
 {
+
     /**
      * @var int
      */
@@ -37,63 +38,46 @@ class Payment extends BasePayment implements PaymentInterface
 
 
     /**
-     * @param int $pgwShopId
-     * @param string $secretKey
-     * @param string $pgwOrderId
-     * @param string $pgwAmount
-     * @param string $pgwAuthorizationType
-     * @param string $pgwSuccessUrl
-     * @param string $pgwFailureUrl
-     * @param string $pgwCardNumber
-     * @param string $pgwCardExpirationDate
-     * @param string $pgwCardVerificationData
-     * @param string $pgwFirstName
-     * @param string $pgwLastName
-     * @param string $pgwStreet
-     * @param string $pgwCity
-     * @param string $pgwPostCode
-     * @param string $pgwCountry
-     * @param string $pgwEmail
-     * @param bool|true $sandbox
+     * Payment constructor.
+     *
+     * @param $data
      */
-    public function __construct(
-        $pgwShopId,
-        $secretKey,
-        $pgwOrderId,
-        $pgwAmount,
-        $pgwAuthorizationType,
-        $pgwSuccessUrl,
-        $pgwFailureUrl,
-        $pgwCardNumber,
-        $pgwCardExpirationDate,
-        $pgwCardVerificationData,
-        $pgwFirstName,
-        $pgwLastName,
-        $pgwStreet,
-        $pgwCity,
-        $pgwPostCode,
-        $pgwCountry,
-        $pgwEmail,
-        $sandbox = true
-    ) {
-        $this->pgwShopId = $pgwShopId;
-        $this->secretKey = $secretKey;
-        $this->pgwOrderId = $pgwOrderId;
-        $this->pgwAmount = $pgwAmount;
-        $this->pgwAuthorizationType = $pgwAuthorizationType;
-        $this->pgwSuccessUrl = $pgwSuccessUrl;
-        $this->pgwFailureUrl = $pgwFailureUrl;
-        $this->pgwCardNumber = $pgwCardNumber;
-        $this->pgwCardExpirationDate = $pgwCardExpirationDate;
-        $this->pgwCardVerificationData = $pgwCardVerificationData;
-        $this->setPgwFirstName($pgwFirstName);
-        $this->setPgwLastName($pgwLastName);
-        $this->setPgwStreet($pgwStreet);
-        $this->setPgwPostCode($pgwPostCode);
-        $this->setPgwCity($pgwCity);
-        $this->setPgwCountry($pgwCountry);
-        $this->setPgwEmail($pgwEmail);
-        $this->sandbox = $sandbox;
+    public function __construct($data) {
+        $this->pgwShopId                        = $this->getParam($data, 'pgw_shop_id');
+        $this->secretKey                        = $this->getParam($data, 'secret_key');
+        $this->pgwOrderId                       = $this->getParam($data, 'pgw_order_id');
+        $this->pgwAmount                        = $this->getParam($data, 'pgw_amount');
+        $this->pgwAuthorizationType             = $this->getParam($data, 'pgw_authorization_type');
+        $this->pgwSuccessUrl                    = $this->getParam($data, 'pgw_success_url');
+        $this->pgwFailureUrl                    = $this->getParam($data, 'pgw_failure_url');
+        $this->pgwCardNumber                    = $this->getParam($data, 'pgw_card_number');
+        $this->pgwCardExpirationDate            = $this->getParam($data, 'pgw_card_expiration_date');
+        $this->pgwCardVerificationData          = $this->getParam($data, 'pgw_card_verification_data');
+
+        $this->setPgwOrderItems($this->getParam($data, 'pgw_order_items'));
+        $this->setPgwFirstName($this->getParam($data, 'pgw_first_name'));
+        $this->setPgwLastName($this->getParam($data, 'pgw_last_name'));
+        $this->setPgwStreet($this->getParam($data, 'pgw_street'));
+        $this->setPgwPostCode($this->getParam($data, 'pgw_post_code'));
+        $this->setPgwCity($this->getParam($data, 'pgw_city'));
+        $this->setPgwCountry($this->getParam($data, 'pgw_country'));
+        $this->setPgwEmail($this->getParam($data, 'pgw_email'));
+        $this->sandbox = $this->getParam($data, 'sandbox', true);
+    }
+
+    /**
+     * @param $data
+     * @param $param
+     * @param null $default
+     * @return specified parameter from data
+     */
+    private function getParam($data, $param, $default = null) {
+
+        if (isset($data[$param])) {
+            return $data[$param];
+        }
+
+        return $default;
     }
 
     /**
@@ -227,8 +211,20 @@ class Payment extends BasePayment implements PaymentInterface
     public function isPgwResponseValid($pgwResponse)
     {
         return $pgwResponse['pgw_signature'] == SignatureGenerator::generateSignatureFromArray(
-            $this->secretKey,
-            $pgwResponse
-        );
+                $this->secretKey,
+                $pgwResponse
+            );
+    }
+
+    /**
+     * @param array $pgwResponse
+     * @return bool
+     */
+    public static function checkPgwResponseValid($pgwResponse, $secretKey)
+    {
+        return $pgwResponse['pgw_signature'] == SignatureGenerator::generateSignatureFromArray(
+                $secretKey,
+                $pgwResponse
+            );
     }
 }

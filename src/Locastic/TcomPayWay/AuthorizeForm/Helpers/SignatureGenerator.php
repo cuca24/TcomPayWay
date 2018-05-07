@@ -71,6 +71,23 @@ class SignatureGenerator
         return hash('sha512', $string);
     }
 
+
+    /**
+     * @param string $secretKey
+     * @param array  $data
+     * @return string
+     */
+    public static function generateSignatureFromNumberedArray($secretKey, $data)
+    {
+        $string = self::METHOD_NAME.$secretKey;
+
+        foreach ($data as $key => $value) {
+            $string .= $value.$secretKey;
+        }
+
+        return hash('sha512', $string);
+    }
+
     /**
      * @param string $secretKey
      * @param array  $data
